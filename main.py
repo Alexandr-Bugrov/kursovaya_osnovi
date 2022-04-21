@@ -53,7 +53,7 @@ class VKuser:
         }
 
     def get_photos_json(self, user_id: str, count: str):
-        """Метод получает фото из ВК по id пользователя и загружает их на яндекс диск"""
+        """Метод получает информацию о заданном количестве фото из VK в формате json"""
         get_photos_params = {'owner_id': user_id,
                              'extended': '1',
                              'album_id': 'profile',
@@ -67,7 +67,8 @@ class VKuser:
 
 
 def get_photo_and_params(photos_params):
-    '''Функция получает параметры фото из VK в формате json и возвращает фото наибольших размер из VK, его имя, и тип размера'''
+    '''Функция получает параметры фото из VK в формате json и возвращает фото наибольших размер из VK
+    его имя и тип размера'''
     likes = photos_params['likes']['count']
     photo_url = photos_params['sizes'][-1]['url']
     photo_size = photos_params['sizes'][-1]['type']
