@@ -20,7 +20,14 @@ class YaUploader:
         folder_params = {'path': file_folderYa,
                          'overwrite': 'True'
                          }
-        requests.put(folder_url, params=folder_params, headers=headers)
+        response = requests.put(folder_url, params=folder_params, headers=headers)
+        # response.raise_for_status()
+        if response.status_code == 201:
+            print(f'Папка "{file_folderYa}" создана')
+        elif response.status_code == 409:
+            print('Папка уже есть')
+        else:
+            print(f'Ошибка в создании папки: {response.status_code}')
 
 
     def upload(self, file_pathYa: str, file):
@@ -32,12 +39,17 @@ class YaUploader:
                   'overwrite': 'True'
                   }
         response = requests.get(upload_url, params=params, headers=headers)
+        response.raise_for_status()
+        if response.status_code != 200:
+            print(f'Процесс получения ссылки неа загрузку файла от сервиса "яндекс диск: "{response.status_code}')
         href_json = response.json()
         href = href_json['href']
         response = requests.put(href, data=file.content)
         response.raise_for_status()
         if response.status_code == 201:
             print('Загружено')
+        else:
+            print(f'Ошибка в процессе загрузки фото на диск: {response.status_code}')
         return response.status_code
 
 
@@ -61,7 +73,11 @@ class VKuser:
                              'rev': '0'
                              }
         get_photos_url = self.url + 'photos.get'
-        photos_params_json = requests.get(get_photos_url, params={**self.params, **get_photos_params}).json()
+        photos_params_json = requests.get(get_photos_url, params={**self.params, **get_photos_params})
+        photos_params_json.raise_for_status()
+        if photos_params_json.status_code != 200:
+            print(f'Процесс получения информации о фото в json: {photos_params_json.status_code}')
+        photos_params_json = photos_params_json.json()
         pprint(photos_params_json)
         return photos_params_json
 
@@ -76,8 +92,11 @@ def get_photo_and_params(photos_params):
         if 'w' in size['type']:
             photo_url = size['url']
             photo_size = size['type']
-    photo = requests.get(photo_url)
     FILE_NAME = f'{likes}.jpg'
+    photo = requests.get(photo_url)
+    photo.raise_for_status()
+    if photo.status_code != 200:
+        print(f'Процесс получения ссылки на фото {FILE_NAME}: {photo.status_code}')
     print(likes)
     print(photo_url)
     return {'name': FILE_NAME, 'content': photo, 'size': photo_size}
